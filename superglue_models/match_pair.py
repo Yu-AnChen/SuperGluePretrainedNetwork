@@ -108,13 +108,14 @@ def match_test_flip_rotate(img_left, img_right, device='cuda'):
     simg_right = img_right[::downsize_factor, ::downsize_factor]
 
     n_matches = []
-    for ff, rr in itertools.product(flip_funcs, rotate_funcs):
+    # only need half of the 4x4 combinations
+    for ff, rr in itertools.product(flip_funcs[:2], rotate_funcs):
         pred = superglue_match(simg_left, rr(ff(simg_right)), device=device)
         n_matches.append(np.sum(pred['matches0'] > -1))
     best_flip, best_rotate = np.unravel_index(
-        np.argmax(n_matches), (4, 4)
+        np.argmax(n_matches), (2, 4)
     )
-    print(np.array(n_matches, int).reshape(4, 4))
+    print(np.array(n_matches, int).reshape(2, 4))
     print(best_flip, best_rotate)
 
     # match actual images using detected flip and rotate
